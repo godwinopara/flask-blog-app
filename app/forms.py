@@ -1,8 +1,8 @@
 from ast import Pass
 from tkinter import E
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
+from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, Length
 from app.models import User
 
 
@@ -31,3 +31,9 @@ class RegistrationForm(FlaskForm):
         if email is not None:
             raise ValidationError(
                 "Email is already registered!,  Please Login or Use a different Email")
+
+
+class EditProfileForm(FlaskForm):
+    username = StringField("username", validators=[DataRequired()])
+    about_me = TextAreaField("About Me", validators=[Length(min=0, max=140)])
+    submit = SubmitField("Submit")
