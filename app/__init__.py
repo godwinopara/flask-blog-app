@@ -1,9 +1,9 @@
 from crypt import methods
 from flask import Flask, flash, redirect, render_template, request, url_for
 from config import Config
-from app.forms import EditProfileForm, EmptyForm, LoginForm, RegistrationForm
+from app.forms import EditProfileForm, EmptyForm, LoginForm, PostForm, RegistrationForm
 from flask_migrate import Migrate
-from app.models import db, User
+from app.models import Post, db, User
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 from datetime import datetime
@@ -33,20 +33,18 @@ def load_user(id):
     return User.query.get(int(id))
 
 
-@app.route("/")
-@app.route("/index")
+@app.route("/", methods=["GET", "POST"])
+@app.route("/index", methods=["GET", "POST"])
 @login_required
 def index():
-    posts = [
-        {
-            'author': {'username': 'John'},
-            'body': 'Beautiful day in Portland!'
-        },
-        {
-            'author': {'username': 'Susan'},
-            'body': 'The Avengers movie was so cool!'
-        }
-    ]
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(body=form.post.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post is now live!')
+        return redirect(url_for('index'))
+    posts = current_user.followed_posts().all()
     return render_template("index.html", title="Home", posts=posts)
 
 
